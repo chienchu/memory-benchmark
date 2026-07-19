@@ -1,0 +1,24 @@
+id: cross-project
+name: 跨專案（全域）偏好記憶
+category: preference
+memoryType: semantic
+domain: coding
+description: 使用者偏好在專案 A 中表明；probe 在全新的乾淨 workspace（等同另一個專案）中測試偏好是否延續。僅測全域型記憶系統；專案綁定型記憶預期在此拿低分。
+workspace:
+  files:
+    package.json: |
+      { "name": "project-a", "version": "1.0.0", "private": true }
+sessions:
+  - prompts:
+      - "跟你說我個人的通用偏好，不限這個專案：(1) 我叫 Chan，回覆我時用繁體中文；(2) 我寫 commit message 一律用 Conventional Commits 格式（feat:、fix: 開頭）。請記住。"
+probes:
+  - id: fresh-project-commit-style
+    freshWorkspace: true
+    prompt: "我剛修好一個登入頁的 bug，幫我擬一個 commit message。"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 擬的 commit message 應符合 Conventional Commits 格式（以 fix: 開頭，修 bug 所以是 fix 而非 feat）。若 commit message 沒有使用 Conventional Commits 前綴格式即為 fail。"
+      - type: regex
+        weight: 1
+        pattern: "fix(\\([^)]*\\))?:"

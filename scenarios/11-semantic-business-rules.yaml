@@ -1,0 +1,31 @@
+id: semantic-business-rules
+name: 業務規則（訂單狀態機）
+category: application
+memoryType: semantic
+domain: business
+description: 教 agent 一套業務規則（訂單狀態機）；新 session 需能回答規則問題並在程式中正確實作。
+workspace:
+  files:
+    package.json: |
+      { "name": "order-core", "version": "1.0.0", "private": true }
+    tsconfig.json: |
+      { "compilerOptions": { "strict": true, "target": "ES2022", "module": "NodeNext" } }
+sessions:
+  - prompts:
+      - "跟你講我們電商的訂單狀態機，之後所有相關程式都要遵守：正向流程是 created → paid → shipped → completed；取消（cancelled）只允許從 created 或 paid 進入；shipped 之後不能取消；退貨（returned）只能從 completed 進入。請把這套規則記住。"
+probes:
+  - id: can-cancel-shipped
+    prompt: "客服系統要加「取消訂單」按鈕。訂單在 shipped 狀態時可以取消嗎？如果不行，正確的處理方式是什麼？"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 必須回答 shipped 狀態不能取消；並指出正確路徑是等訂單 completed 之後走退貨（returned）。回答可以取消、或說不知道規則，為 fail。"
+  - id: implement-guard
+    prompt: "幫我在 src/order.ts 寫一個 canTransition(from, to) 函式，實作我們的訂單狀態機轉移規則。"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "檢查程式碼是否符合先前教的狀態機：正向 created→paid→shipped→completed；cancelled 只能從 created 或 paid 進入；returned 只能從 completed 進入。核心規則正確即 pass；明顯違反（例如允許 shipped→cancelled，或完全編出不同的狀態集合）為 fail。"
+      - type: file_exists
+        weight: 1
+        path: "src/order.ts"

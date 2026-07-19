@@ -1,0 +1,29 @@
+id: episodic-debug-history
+name: 對話歷程回憶（debug 進度）
+category: recall
+memoryType: episodic
+domain: debugging
+description: 跨兩個 session 的 debug 歷程（試過什麼、排除什麼、查到哪）；新 session 應能接續進度而不重複已排除的方向。
+workspace:
+  files:
+    package.json: |
+      { "name": "worker-service", "version": "1.0.0", "private": true }
+    src/cache.ts: |
+      const cache = new Map<string, unknown>();
+      export function get(key: string) { return cache.get(key); }
+      export function set(key: string, value: unknown) { cache.set(key, value); }
+sessions:
+  - prompts:
+      - "我們正在追一個 memory leak：症狀是 worker 跑 12 小時後 RSS 漲到 2GB。目前進度：我已經試過升級 Node 版本，確認沒有用，這個方向可以排除。先記錄到這裡。"
+  - prompts:
+      - "memory leak 有新進展：我用 heap snapshot 比對，確定是 src/cache.ts 裡的 Map 一直長大，完全沒有淘汰機制。今天先到這，明天繼續。"
+probes:
+  - id: recall-progress
+    prompt: "接續我們之前在追的那個 memory leak：目前查到哪了？哪些方向已經試過排除了？下一步你建議怎麼做？"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 需正確回憶兩件事：(1) 升級 Node 版本已試過且排除；(2) 已用 heap snapshot 定位到 src/cache.ts 的 Map 無淘汰機制。兩者都提到，且下一步建議合理（例如加上 LRU/容量上限/TTL 淘汰）為 pass；漏掉已排除項或定位結論、或建議重新嘗試已排除的方向為 fail。"
+      - type: contains
+        weight: 1
+        value: "cache"

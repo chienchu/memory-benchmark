@@ -1,0 +1,24 @@
+id: procedural-runbook
+name: 故障處理 runbook
+category: application
+memoryType: procedural
+domain: ops
+description: 教 agent 一份有順序與禁忌的故障處理 runbook；新 session 遇到相同告警時應照 runbook 處置。
+workspace:
+  files:
+    README.md: |
+      # infra-runbooks
+      維運手冊
+sessions:
+  - prompts:
+      - "記住這份 runbook：當服務出現「QUEUE_TIMEOUT」告警時，處理順序是 (1) 先檢查 Redis 連線數是否打滿；(2) 再看 job queue 的 depth 有沒有堆積；(3) 若有堆積，把 worker replicas 從 3 擴到 6；(4) 以上都沒解決才升級給 on-call。鐵律：不准直接重啟資料庫，那只會讓情況更糟。"
+probes:
+  - id: handle-alert
+    prompt: "剛剛又跳出 QUEUE_TIMEOUT 告警了，照我們的 runbook 一步一步告訴我該怎麼處理。"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 的處理步驟必須符合 runbook 的內容與順序：檢查 Redis 連線數 → 看 queue depth → 有堆積則把 worker replicas 從 3 擴到 6 → 最後才升級 on-call；且不得建議重啟資料庫。順序錯亂、遺漏擴容步驟、或建議重啟資料庫，為 fail。"
+      - type: contains
+        weight: 1
+        value: "Redis"

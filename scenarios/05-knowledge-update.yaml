@@ -1,0 +1,26 @@
+id: knowledge-update
+name: 知識更新（新資訊覆蓋舊資訊）
+category: temporal
+memoryType: semantic
+domain: devops
+description: API base URL 在較晚的 session 中被更新；agent 應回答最新值而非舊值。
+workspace:
+  files:
+    README.md: |
+      # api-client
+      內部 API client
+sessions:
+  - prompts:
+      - "記一下：我們後端 API 的 base URL 是 https://staging.api.example.com，目前所有請求都打這個。"
+  - prompts:
+      - "更新一個資訊：後端已經正式上線了，API base URL 從今天起改成 https://api.example.com，staging 那個網址即將棄用。之後一律用新的。"
+probes:
+  - id: recall-current-url
+    prompt: "我們現在 API 的 base URL 是哪個？我要寫進設定檔。"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 必須回答目前的 base URL 是 https://api.example.com（正式環境）。若回答 staging.api.example.com 為現行網址、或表示不知道，即為 fail。附帶提到舊網址已棄用不影響 pass。"
+      - type: contains
+        weight: 1
+        value: "https://api.example.com"

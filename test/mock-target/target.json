@@ -1,0 +1,7 @@
+{
+  "name": "mock",
+  "description": "煙霧測試用：搭配 test/mock-agent.mjs，不需要 opencode 與 API key。",
+  "env": {
+    "MOCK_MEMORY_PATH": "{{MEMORY_DIR}}/mock-memory.txt"
+  }
+}

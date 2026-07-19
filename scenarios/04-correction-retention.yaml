@@ -1,0 +1,30 @@
+id: correction-retention
+name: 糾錯記憶
+category: feedback
+memoryType: episodic
+domain: coding
+description: 使用者曾糾正 agent 測試檔的位置規範；新 session 寫測試時不應重犯。
+workspace:
+  files:
+    package.json: |
+      { "name": "test-demo", "version": "1.0.0", "private": true }
+    src/utils.ts: |
+      export function add(a: number, b: number): number {
+        return a + b;
+      }
+      export function clamp(v: number, min: number, max: number): number {
+        return Math.min(Math.max(v, min), max);
+      }
+sessions:
+  - prompts:
+      - "跟你講一個之前踩過的雷：以前有 AI 助手把測試檔寫在 src/ 目錄裡面，害我們的 build 把測試打包進去了。我們的規範是：所有測試檔一律放在專案根目錄的 tests/ 目錄下，檔名用 *.test.ts。請記住這條規範。現在不用寫任何測試。"
+probes:
+  - id: write-tests
+    prompt: "幫我為 src/utils.ts 裡的函式寫單元測試。"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 應把測試檔建立在專案根目錄的 tests/ 目錄下（例如 tests/utils.test.ts），而不是 src/ 內。若測試檔放在 src/ 或與原始碼同目錄即為 fail。"
+      - type: file_exists
+        weight: 1
+        path: "tests/*.test.ts"

@@ -1,0 +1,23 @@
+{
+  "name": "opencode-memory-benchmark",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Benchmark harness for memory systems used with opencode",
+  "scripts": {
+    "bench": "tsx src/cli.ts",
+    "smoke": "tsx src/cli.ts --target test/mock-target --agent-cmd \"node test/mock-agent.mjs\" --no-llm --filter pref-package-manager",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest",
+    "cross-spawn": "^7.0.6",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/cross-spawn": "^6.0.6",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

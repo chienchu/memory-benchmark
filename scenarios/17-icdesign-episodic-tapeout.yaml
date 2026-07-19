@@ -1,0 +1,30 @@
+id: icdesign-episodic-tapeout
+name: Tape-out 事故回憶與經驗遷移
+category: recall
+memoryType: episodic
+domain: ic-design
+description: 記錄一次 tape-out 前的 timing 事故（root cause、修法、教訓）；新 session 應能回憶事件並把教訓套用到新任務。
+workspace:
+  files:
+    README.md: |
+      # asic-project
+      ASIC 專案筆記
+sessions:
+  - prompts:
+      - "幫我記錄這次的教訓：上個月 A0 tape-out 前三天，STA 才發現 DDR PHY 介面有 12 條 hold violation，root cause 是 clock tree 在 SS corner 的 skew 被估得太樂觀。最後靠手動加 hold buffer，72 小時內修完勉強趕上 tape-out。教訓：以後在 pre-CTS 階段就要先對 DDR 這類介面做 hold margin 檢查，不能等 sign-off STA 才看。"
+probes:
+  - id: recall-incident
+    prompt: "上次 A0 tape-out 前那個 timing 問題是怎麼回事？root cause 是什麼、最後怎麼解的？"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 需說出：DDR PHY 介面出現 hold violation（12 條，條數可不精確），root cause 是 clock tree 在 SS corner 的 skew 估計過於樂觀，最後加 hold buffer 修掉。root cause 或修法答錯/說不知道為 fail。"
+      - type: contains
+        weight: 1
+        value: "hold"
+  - id: apply-lesson
+    prompt: "我們下週要開始新專案的 P&R 規劃了，根據過去的經驗，有什麼特別要注意的？"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 應引用上次 tape-out 的教訓：在 pre-CTS（或早期）階段就對 DDR/高速介面做 hold margin 檢查，不要等 sign-off STA 才發現。有明確提到這條經驗（或等義描述）為 pass；只給通用 P&R 建議而完全沒引用該教訓為 fail。"

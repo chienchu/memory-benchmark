@@ -1,0 +1,30 @@
+id: icmfg-episodic-excursion
+name: 良率 excursion 事件回憶與經驗遷移
+category: recall
+memoryType: episodic
+domain: ic-manufacturing
+description: 記錄一次良率事件（lot、症狀、root cause、處置、結果）；新 session 應能回憶細節並在類似症狀出現時運用經驗。
+workspace:
+  files:
+    README.md: |
+      # yield-notes
+      良率工程筆記
+sessions:
+  - prompts:
+      - "記錄這次 excursion：lot W2607 的良率從平常的 89% 掉到 62%，defect map 顯示 wafer 邊緣有環狀（ring）分布的 particle。追查後 root cause 是 etch chamber C 的 focus ring 磨耗產生 particle。處置是 chamber C 停機更換 focus ring 並做 wet clean，requal 通過後才放行，後續 lot 良率回到 88%。"
+probes:
+  - id: recall-excursion
+    prompt: "之前 lot W2607 那次良率事件，root cause 查到是什麼？當時怎麼處置的？"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 需說出 root cause 是 etch chamber C 的 focus ring 磨耗產生 particle，處置為停機更換 focus ring（加 wet clean）、requal 後才放行。root cause 答錯（例如說是別的機台或別的原因）或說不知道為 fail。"
+      - type: contains
+        weight: 1
+        value: "focus ring"
+  - id: transfer-experience
+    prompt: "今天有一批 wafer 的 defect map 又出現邊緣環狀分布的 particle，根據我們過去的經驗，你會先懷疑什麼方向？"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 應引用 W2607 的經驗：邊緣環狀 particle 的模式先懷疑 etch chamber 的 focus ring 磨耗（或 chamber 零件/particle 來源，需明確連結到上次事件）。有引用過去事件並指向 focus ring/etch chamber 為 pass；只給完全通用的 defect 分析建議、未引用過去經驗為 fail。"

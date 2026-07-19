@@ -1,0 +1,40 @@
+id: procedural-release
+name: 發版 SOP（步驟與順序）
+category: application
+memoryType: procedural
+domain: release
+description: 教 agent 一套有嚴格順序的發版流程；新 session 執行發版時應照 SOP 進行。
+workspace:
+  files:
+    package.json: |
+      {
+        "name": "release-demo",
+        "version": "1.2.3",
+        "private": true,
+        "scripts": { "test": "node -e \"console.log('all tests passed')\"" }
+      }
+    CHANGELOG.md: |
+      # Changelog
+
+      ## 1.2.3
+      - 修正登入逾時問題
+    src/index.ts: |
+      export const VERSION = "1.2.3";
+sessions:
+  - prompts:
+      - "我們的發版 SOP，順序不能亂：(1) 先跑 npm test 確認全綠；(2) 更新 package.json 的版號；(3) 在 CHANGELOG.md 加上這一版的變更說明；(4) commit 之後打 vX.Y.Z 格式的 git tag；(5) push tag 觸發 CI 發布。另外一條鐵律：絕對不直接 push main。請把整套流程記住，今天先不發版。"
+probes:
+  - id: do-release
+    prompt: "這次的改動完成了，幫我發布一個 patch 版本。先列出你依照我們 SOP 要做的步驟，然後執行可以在本地完成的部分（不用真的 push）。"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 列出的步驟必須符合 SOP 的內容與順序：跑測試 → 更新 package.json 版號（1.2.3→1.2.4）→ 更新 CHANGELOG.md → commit 並打 v1.2.4 之類的 tag → push tag。且不得建議直接 push main。順序明顯錯誤、漏掉 CHANGELOG 或 tag 步驟、或建議直接 push main，為 fail。"
+      - type: file_contains
+        weight: 1
+        path: "CHANGELOG.md"
+        value: "1.2.4"
+      - type: file_contains
+        weight: 1
+        path: "package.json"
+        value: "1.2.4"

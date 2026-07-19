@@ -1,0 +1,30 @@
+id: semantic-terminology
+name: 內部術語與組織知識
+category: recall
+memoryType: semantic
+domain: org-knowledge
+description: 教 agent 公司內部術語（黑話對應的實體）；新 session 使用術語時 agent 應正確理解。
+workspace:
+  files:
+    README.md: |
+      # team-notes
+      團隊筆記
+sessions:
+  - prompts:
+      - "幾個我們公司的內部術語，記住：(1)「PX」指 Partner Exchange，是對接外部合作夥伴的系統；(2)「大盤」指 metrics-aggregator 這個服務，負責彙總所有業務指標；(3)「走灰度」意思是先對 5% 流量發布再逐步放量。"
+probes:
+  - id: use-jargon
+    prompt: "「大盤」最近常常 lag，如果要動手改它，是哪個服務的 codebase？另外提醒我一下「走灰度」是什麼意思？"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 必須回答「大盤」對應的是 metrics-aggregator 服務，且「走灰度」是先對 5% 流量發布（再逐步放量）。任一答錯或說不知道為 fail。"
+      - type: contains
+        weight: 1
+        value: "metrics-aggregator"
+  - id: use-jargon-px
+    prompt: "PX 那邊的合作夥伴回報 API 驗簽失敗，這個問題是屬於哪個系統的範疇？"
+    checks:
+      - type: llm
+        weight: 1
+        rubric: "agent 應知道 PX 指 Partner Exchange（對接外部合作夥伴的系統），並指出問題屬於該系統範疇。若表示不知道 PX 是什麼、或指向明顯編造的其他系統，為 fail。"

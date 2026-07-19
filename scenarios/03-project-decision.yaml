@@ -1,0 +1,24 @@
+id: project-decision
+name: 專案技術決策
+category: project-knowledge
+memoryType: semantic
+domain: architecture
+description: 先前 session 討論並確定訂單資料使用 PostgreSQL 的決策與理由；新 session 應能回憶決策及原因。
+workspace:
+  files:
+    README.md: |
+      # order-service
+      訂單服務（開發中）
+sessions:
+  - prompts:
+      - "我們剛開完架構會議，做了一個重要決定：訂單資料改用 PostgreSQL 而不是 MongoDB，主要原因是訂單有強一致性需求、需要交易（transaction）保證，而且我們要用外鍵維持訂單與付款的關聯完整性。這個決策請記下來，之後所有訂單相關的設計都要以此為前提。"
+probes:
+  - id: recall-db-decision
+    prompt: "提醒我一下，我們訂單資料決定用哪種資料庫？當初的理由是什麼？"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 必須回答 PostgreSQL，且至少提到一項當初的理由（強一致性、交易保證、或外鍵/關聯完整性）。若回答 MongoDB、說不知道、或只回答資料庫名稱但把理由完全編造成別的內容，即為 fail。"
+      - type: contains
+        weight: 1
+        value: "PostgreSQL"

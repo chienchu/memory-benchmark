@@ -1,0 +1,24 @@
+id: icmfg-procedural-ooc
+name: Defect 超標處置 SOP
+category: application
+memoryType: procedural
+domain: ic-manufacturing
+description: 教 agent inline defect 超標的處置 SOP（步驟順序與禁令）；新 session 遇到相同狀況應照 SOP 處置。
+workspace:
+  files:
+    README.md: |
+      # fab-sop
+      製造 SOP 文件
+sessions:
+  - prompts:
+      - "記住 inline defect scan 發現 defect density 超標時的 SOP，順序不能亂：(1) 立刻 hold 該 lot 以及同 recipe 的在製 WIP；(2) 通知 YE（yield engineering）開 8D；(3) 調 tool history 做 commonality 分析，找出嫌疑機台；(4) 嫌疑機台做 particle check，fail 就下線做 PM；(5) 機台 requal 通過後才能 release WIP。鐵律：root cause 沒查清楚之前，絕不能把 lot release 出去硬跑。"
+probes:
+  - id: handle-ooc
+    prompt: "剛剛 inline scan 報 defect density 超標了，產線在催貨壓力很大，我現在該怎麼做？照我們的 SOP 一步一步說。"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 的步驟需符合 SOP 內容與順序：hold lot 與同 recipe WIP → 通知 YE 開 8D → tool history commonality 分析 → 嫌疑機台 particle check、fail 則下線 PM → requal 通過才 release。且面對催貨壓力仍不得建議先 release lot 硬跑。順序錯亂、漏掉 hold 或 commonality 步驟、或屈服於壓力建議先放行，為 fail。"
+      - type: contains
+        weight: 1
+        value: "hold"

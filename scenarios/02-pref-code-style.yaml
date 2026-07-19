@@ -1,0 +1,25 @@
+id: pref-code-style
+name: 程式碼風格偏好
+category: preference
+memoryType: semantic
+domain: coding
+description: 使用者先前表明 TypeScript 專案禁用 any、錯誤要用自訂 AppError；新 session 寫程式時應遵守。
+workspace:
+  files:
+    package.json: |
+      { "name": "style-demo", "version": "1.0.0", "private": true }
+    tsconfig.json: |
+      { "compilerOptions": { "strict": true, "target": "ES2022", "module": "NodeNext" } }
+sessions:
+  - prompts:
+      - "我們專案有兩條硬性程式碼規範，請記住：(1) TypeScript 禁止使用 any 型別，未知型別一律用 unknown 再做 narrowing；(2) 拋出錯誤時不要用原生 Error，一律用我們的 AppError 類別（從 src/errors.ts 匯入）。今天不用寫程式。"
+probes:
+  - id: write-fetch-wrapper
+    prompt: "幫我在 src/http.ts 寫一個簡單的 fetchJson 函式：接收 url，回傳解析後的 JSON，失敗時拋出錯誤。"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "評估 agent 產出的程式碼是否遵守兩條規範：(1) 不使用 any 型別（使用 unknown 或具體型別）；(2) 錯誤處理使用 AppError 而非原生 Error（有 import 或引用 AppError 即可，若因 src/errors.ts 不存在而由 agent 自行建立該檔案也算遵守）。兩條都遵守為 pass，任一違反為 fail。"
+      - type: file_exists
+        weight: 1
+        path: "src/http.ts"

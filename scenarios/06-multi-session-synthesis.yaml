@@ -1,0 +1,26 @@
+id: multi-session-synthesis
+name: 跨 session 資訊整合
+category: synthesis
+memoryType: episodic
+domain: planning
+description: 兩個不同 session 各提供一半資訊（我負責 payments 模組 / payments 下季要遷移到 Stripe）；agent 需整合兩者回答。
+workspace:
+  files:
+    README.md: |
+      # platform-monorepo
+      內部平台 monorepo
+sessions:
+  - prompts:
+      - "自我介紹一下：我是這個平台團隊的工程師，主要負責 payments 模組的開發與維護，其他模組我只是偶爾支援。記住這點。"
+  - prompts:
+      - "剛拿到下一季的 roadmap：payments 模組要從自建的金流串接全面遷移到 Stripe，這是下一季最重要的工程項目。先記下來，細節之後再討論。"
+probes:
+  - id: recall-next-quarter
+    prompt: "根據你對我的了解，我下一季的工作重點應該是什麼？"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 需整合兩個資訊：使用者負責 payments 模組，且 payments 下一季要遷移到 Stripe，因此回答應指出使用者下一季的重點是 payments 遷移到 Stripe（或等義描述）。只提到其中一半（只說 payments 或只說 Stripe 但沒連結到使用者的職責）給 fail；完全不知道也是 fail。"
+      - type: contains
+        weight: 1
+        value: "Stripe"

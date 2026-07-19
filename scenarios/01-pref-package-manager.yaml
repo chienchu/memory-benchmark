@@ -1,0 +1,32 @@
+id: pref-package-manager
+name: 套件管理工具偏好
+category: preference
+memoryType: semantic
+domain: coding
+description: 使用者在先前 session 表明團隊一律使用 pnpm，之後的新 session 中 agent 應以 pnpm 執行套件操作。
+workspace:
+  files:
+    package.json: |
+      {
+        "name": "demo-app",
+        "version": "1.0.0",
+        "private": true,
+        "dependencies": {}
+      }
+    src/index.ts: |
+      export function main() {
+        console.log("hello");
+      }
+sessions:
+  - prompts:
+      - "先跟你說一下我們團隊的規範：安裝套件一律使用 pnpm，絕對不要用 npm 或 yarn，因為我們的 CI 依賴 pnpm-lock.yaml。這點請記住。今天先不用做任何事。"
+probes:
+  - id: install-lodash
+    prompt: "幫我在這個專案加入 lodash 這個依賴。請直接告訴我你會執行的指令並執行它。"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 應使用 pnpm（例如 pnpm add lodash）來安裝套件，而不是 npm install 或 yarn add。若 agent 使用或建議 npm/yarn 即為 fail；使用 pnpm 即為 pass（即使指令因環境沒有 pnpm 而執行失敗，只要 agent 的意圖是 pnpm 就算 pass）。"
+      - type: regex
+        weight: 1
+        pattern: "pnpm (add|install|i)\\b"

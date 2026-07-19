@@ -1,0 +1,24 @@
+id: icdesign-procedural-signoff
+name: RTL sign-off 流程 SOP
+category: application
+memoryType: procedural
+domain: ic-design
+description: 教 agent RTL freeze 後的 sign-off 流程（步驟順序與 waiver 鐵律）；新 session 應能照流程指導作業。
+workspace:
+  files:
+    README.md: |
+      # signoff-flow
+      Sign-off 流程文件
+sessions:
+  - prompts:
+      - "記住我們 RTL freeze 之後的 sign-off 流程，順序不能亂：(1) 先跑 lint（Spyglass）把 error 清乾淨；(2) CDC check；(3) synthesis 產出 netlist；(4) STA 三個 corner（SS/TT/FF）都要 clean；(5) LEC 比對 RTL 與 netlist 一致；(6) 全部過了才能送 P&R。另一條鐵律：CDC 的 waiver 一定要 design owner 簽核，工程師不能自己 waive。"
+probes:
+  - id: walk-signoff
+    prompt: "RTL 剛 freeze 了，到送 P&R 之前我要依序做哪些事？另外 CDC 報告裡有幾條我覺得是 false positive，可以直接 waive 掉嗎？"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "兩部分都要對：(1) 流程順序符合 lint → CDC → synthesis → STA（三 corner）→ LEC → 送 P&R（漏掉一兩步的名稱但順序正確可從寬，順序錯亂或漏掉 STA/LEC 為 fail）；(2) 必須指出 CDC waiver 需要 design owner 簽核、不能自行 waive（回答可以自己 waive 為 fail）。"
+      - type: contains
+        weight: 1
+        value: "LEC"

@@ -1,0 +1,40 @@
+id: procedural-endpoint-sop
+name: 新增 API endpoint 的 SOP
+category: application
+memoryType: procedural
+domain: backend
+description: 教 agent 新增 endpoint 的標準作法（含容易被遺漏的最後一步）；新 session 實作時應完整遵循。
+workspace:
+  files:
+    package.json: |
+      { "name": "api-server", "version": "1.0.0", "private": true }
+    src/validation.ts: |
+      export function validate<T>(schema: unknown, input: unknown): T {
+        // 簡化示意：實際上做 schema 驗證
+        return input as T;
+      }
+    src/routes/.gitkeep: ""
+    src/services/.gitkeep: ""
+    openapi.yaml: |
+      openapi: "3.0.0"
+      info:
+        title: api-server
+        version: "1.0.0"
+      paths: {}
+sessions:
+  - prompts:
+      - "我們新增 API endpoint 有固定作法，記住：(1) route 檔放在 src/routes/；(2) 輸入驗證統一用 src/validation.ts 的 validate() 包；(3) 商業邏輯放 src/services/，不要寫在 route 裡；(4) 最後一定要同步更新 openapi.yaml——這步最常被忘記，忘了會被 CI 擋下來。"
+probes:
+  - id: add-endpoint
+    prompt: "幫我加一個 GET /health 的 endpoint，回傳 { \"status\": \"ok\" }，照我們的規範做。"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 應遵循 SOP：route 檔建立在 src/routes/ 下，並且有更新 openapi.yaml 加入 /health。health 這種簡單 endpoint 對 validation/service 的要求可以從寬，但沒有更新 openapi.yaml 即為 fail；route 檔放錯位置（不在 src/routes/）也為 fail。"
+      - type: file_contains
+        weight: 1
+        path: "openapi.yaml"
+        value: "/health"
+      - type: file_exists
+        weight: 1
+        path: "src/routes/*.ts"

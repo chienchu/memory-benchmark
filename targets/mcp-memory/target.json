@@ -1,0 +1,17 @@
+{
+  "name": "mcp-memory",
+  "description": "官方 @modelcontextprotocol/server-memory（knowledge graph）以 local MCP server 掛進 opencode。",
+  "opencode": {
+    "mcp": {
+      "memory": {
+        "type": "local",
+        "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],
+        "enabled": true,
+        "environment": {
+          "MEMORY_FILE_PATH": "{{MEMORY_DIR}}/memory.json"
+        }
+      }
+    }
+  },
+  "agentsMd": "## 記憶系統使用規範\n\n你接有一個 memory MCP server（knowledge graph）。請遵守：\n\n1. 每個 session 開始處理任務前，先用 memory 工具搜尋與使用者、本專案相關的既有記憶。\n2. 使用者提到偏好、規範、決策、或糾正你的行為時，立刻把重點存入 memory。\n3. 回答與執行任務時，以 memory 中的資訊為準；資訊有更新時要更新 memory 而不是累加矛盾內容。"
+}

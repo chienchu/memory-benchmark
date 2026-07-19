@@ -1,0 +1,30 @@
+id: episodic-incident
+name: 事件回憶（production 事故）
+category: recall
+memoryType: episodic
+domain: devops
+description: 記錄一次具體事故（時間、時長、root cause、修法）；新 session 應能回憶事件細節。
+workspace:
+  files:
+    README.md: |
+      # order-service
+      訂單服務
+sessions:
+  - prompts:
+      - "幫我記錄一下這次事故：7 月 9 日星期三凌晨兩點左右，production 的訂單資料庫發生 outage，持續約 40 分鐘。root cause 是 connection pool 耗盡——有個批次任務沒有釋放連線。最後我們在 hotfix/0709-conn-pool 分支修掉，並把 pool size 從 20 調到 50。"
+probes:
+  - id: recall-root-cause
+    prompt: "上次那個 production 訂單資料庫的事故，root cause 是什麼？最後怎麼修的？"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 必須說出 root cause 是 connection pool 耗盡（批次任務未釋放連線）；修法需提到 hotfix/0709-conn-pool 分支或 pool size 從 20 調到 50 至少其中一項。root cause 答錯或說不知道為 fail。"
+      - type: contains
+        weight: 1
+        value: "connection pool"
+  - id: recall-when
+    prompt: "那次資料庫 outage 是什麼時候發生的？持續了多久？"
+    checks:
+      - type: llm
+        weight: 1
+        rubric: "agent 應回答 7 月 9 日（或星期三）凌晨兩點左右發生、持續約 40 分鐘。時間點與時長兩項中至少答對一項且無明顯錯誤資訊為 pass；兩項皆答錯或說不知道為 fail。"

@@ -1,0 +1,31 @@
+id: icdesign-semantic-rules
+name: RTL 設計規範（CDC 與 reset）
+category: application
+memoryType: semantic
+domain: ic-design
+description: 教 agent 團隊的 RTL 設計規範（reset 策略、CDC 處理、命名）；新 session 應能回答規範問題並在寫 RTL 時遵守。
+workspace:
+  files:
+    README.md: |
+      # soc-rtl
+      SoC RTL repository
+    rtl/.gitkeep: ""
+sessions:
+  - prompts:
+      - "我們 SoC 團隊的 RTL 設計規範，之後寫任何 RTL 都要遵守：(1) reset 一律採 asynchronous assert、synchronous de-assert（async reset, sync release）；(2) 跨 clock domain 的單 bit 控制訊號必須過 2-stage synchronizer；多 bit 的 bus 絕對不能只靠 synchronizer，要用 async FIFO 或 valid/ack handshake；(3) module 與檔名用小寫加底線，一個檔案一個 module，放在 rtl/ 目錄。請記住。"
+probes:
+  - id: cdc-bus-question
+    prompt: "我要把一個 8-bit 的狀態 bus 從 100MHz domain 傳到 25MHz domain，照我們的規範應該怎麼做？"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "agent 必須指出多 bit bus 不能只用 2-stage synchronizer（那只適用單 bit），正確做法是 async FIFO 或 valid/ack handshake（提及其一即可）。若回答直接對每個 bit 各自加 2-stage synchronizer、或說不知道規範，為 fail。"
+  - id: write-reset-rtl
+    prompt: "幫我在 rtl/ 寫一個帶 reset 的 8-bit counter module（Verilog），reset 行為要照我們的規範。"
+    checks:
+      - type: llm
+        weight: 2
+        rubric: "檢查 Verilog 程式碼的 reset 是否為 asynchronous assert、synchronous de-assert：典型寫法是 always block 的 sensitivity list 含 negedge rst_n（async assert），並搭配 reset synchronizer 或至少在說明中指出 de-assert 需同步化。若寫成純同步 reset 或純非同步（無同步釋放概念）且未提及規範，為 fail；module/檔名未用小寫底線不影響主判定但可列入參考。"
+      - type: file_exists
+        weight: 1
+        path: "rtl/*.v"
